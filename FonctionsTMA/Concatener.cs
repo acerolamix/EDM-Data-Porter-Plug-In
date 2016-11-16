@@ -206,7 +206,7 @@ namespace FonctionsTMA
                 string res = gestFic.ConcatFiles(files2Process.Where(fic => File.ReadLines(fic).Count() > 0).ToList());
 
                 if (doVerbs)
-                    LogMessage(MessageSeverity.Information, "Concaténation du fichier '" + res + "' effectuée");
+                    LogMessage(MessageSeverity.Information, "Concaténation du fichier '" + res + "' terminée");
                 
 
                 // Gestion du code retour - En cas de succès
