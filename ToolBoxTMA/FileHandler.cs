@@ -269,29 +269,29 @@ namespace ToolBoxTMA
                                                 // Test pour savoir si d'autres fichiers auront le même nom
                                                 if (ListeFichiers.Count(ffi => ffi.Contains(nomFinal)) > 1)
                                                 {
-                                                    if (!Directory.Exists(
-                                                                            Path.Combine
-                                                                            (
-                                                                                fi.DirectoryName,
-                                                                                fi.Name.Substring(0, fi.Name.Length - FileType.Length)
-                                                                            )
-                                                                          )
+                                                    if (!Directory
+                                                                 .Exists(
+                                                                            Path.Combine(
+                                                                                            fi.DirectoryName,
+                                                                                            fi.Name.Substring(0, fi.Name.Length - FileType.Length)
+                                                                                        )
+                                                                         )
                                                        )
-                                                    {
-                                                        Directory.CreateDirectory(
-                                                                                    Path.Combine
-                                                                                    (
-                                                                                        fi.DirectoryName,
-                                                                                        fi.Name.Substring(0, fi.Name.Length - FileType.Length)
-                                                                                    )
-                                                                                 );
-                                                    }
+                                                            {
+                                                                Directory.CreateDirectory(
+                                                                                            Path.Combine
+                                                                                            (
+                                                                                                fi.DirectoryName,
+                                                                                                fi.Name.Substring(0, fi.Name.Length - FileType.Length)
+                                                                                            )
+                                                                                         );
 
-                                                    dest = Path.Combine(
-                                                                            fi.DirectoryName,
-                                                                            fi.Name.Substring(0, fi.Name.Length - FileType.Length),
-                                                                            nomFinal + FileType
-                                                                       );
+                                                                dest = Path.Combine(
+                                                                                        fi.DirectoryName,
+                                                                                        fi.Name.Substring(0, fi.Name.Length - FileType.Length),
+                                                                                        nomFinal + FileType
+                                                                                   );
+                                                            }                                                    
                                                 }
                                                 else
                                                     dest = Path.Combine(fi.DirectoryName, nomFinal + FileType);
