@@ -1,4 +1,11 @@
 ﻿
+/**///-----------------------------------------------------------------------
+// <copyright file="FileHandler" company="SCOR">
+//     Copyright (c) SVE DEVS.
+// </copyright>
+// <author>S. VESPUCE</author>
+//-----------------------------------------------------------------------
+
 namespace ToolBoxTMA
 {
     using OfficeOpenXml;

@@ -1,4 +1,10 @@
 ﻿
+/**///-----------------------------------------------------------------------
+// <copyright file="ConcatXL2CSV" company="SCOR">
+//     Copyright (c) SVE DEVS.
+// </copyright>
+// <author>S. VESPUCE</author>
+//-----------------------------------------------------------------------
 
 namespace FonctionsTMA
 {

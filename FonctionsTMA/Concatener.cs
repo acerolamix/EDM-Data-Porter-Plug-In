@@ -1,4 +1,10 @@
-﻿
+﻿//-----------------------------------------------------------------------
+// <copyright file="Concatener" company="SCOR">
+//     Copyright (c) SVE DEVS.
+// </copyright>
+// <author>S. VESPUCE</author>
+//-----------------------------------------------------------------------
+
 namespace FonctionsTMA
 {
     using CADIS.Plugin;
