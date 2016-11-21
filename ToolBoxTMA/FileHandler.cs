@@ -278,20 +278,21 @@ namespace ToolBoxTMA
                                                                          )
                                                        )
                                                             {
+                                                                // Création du répertoire de  stockage du fichier privé de son horodatage
                                                                 Directory.CreateDirectory(
                                                                                             Path.Combine
                                                                                             (
                                                                                                 fi.DirectoryName,
                                                                                                 fi.Name.Substring(0, fi.Name.Length - FileType.Length)
                                                                                             )
-                                                                                         );
-
-                                                                dest = Path.Combine(
-                                                                                        fi.DirectoryName,
-                                                                                        fi.Name.Substring(0, fi.Name.Length - FileType.Length),
-                                                                                        nomFinal + FileType
-                                                                                   );
-                                                            }                                                    
+                                                                                         );                                                                
+                                                            }
+                                                            // Détermination du du chemin complet du fichier privé de son horodatage
+                                                            dest = Path.Combine(
+                                                                                    fi.DirectoryName,
+                                                                                    fi.Name.Substring(0, fi.Name.Length - FileType.Length),
+                                                                                    nomFinal + FileType
+                                                                                );
                                                 }
                                                 else
                                                     dest = Path.Combine(fi.DirectoryName, nomFinal + FileType);
