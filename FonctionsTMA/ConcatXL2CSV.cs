@@ -132,7 +132,7 @@ namespace FonctionsTMA
                 // Initialisation de la classe de gestion des fichiers
                 if (doVerbs)
                     LogMessage(MessageSeverity.Information, "Initialisation des paramètres de la fonction 'ConcatXL2CSV'");
-                FileHandler gestFic = new FileHandler(monRepIn, SearchOption.TopDirectoryOnly, ".csv", monRepOut, "", "", separator, listeSH, dtMapping.Rows);
+                FileHandler gestFic = new FileHandler(monRepIn, SearchOption.TopDirectoryOnly, ".csv", monRepOut, String.Empty, String.Empty, separator, listeSH, dtMapping.Rows);
 
                 // Récupération des lignes issues des onglets
                 if (doVerbs)

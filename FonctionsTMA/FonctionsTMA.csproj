@@ -62,8 +62,9 @@
     <Reference Include="CADIS.IO">
       <HintPath>\\frdeffilev1\U002266$\PROJ\DOTNET\PLUGIN\Template_Chris\CADIS.Plugin.Base\CADIS.IO.dll</HintPath>
     </Reference>
-    <Reference Include="CADIS.Plugin.Base">
-      <HintPath>\\frdeffilev1\U002266$\PROJ\DOTNET\PLUGIN\Template_Chris\CADIS.Plugin.Base\CADIS.Plugin.Base.dll</HintPath>
+    <Reference Include="CADIS.Plugin.Base, Version=3.5.0.0, Culture=neutral, PublicKeyToken=7cd40eafb2b40e73, processorArchitecture=MSIL">
+      <SpecificVersion>False</SpecificVersion>
+      <HintPath>..\..\..\CADIS_dlls\CADIS.Plugin.Base.dll</HintPath>
     </Reference>
     <Reference Include="System" />
     <Reference Include="System.Core" />

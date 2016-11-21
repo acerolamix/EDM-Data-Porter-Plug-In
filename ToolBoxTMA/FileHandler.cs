@@ -103,7 +103,7 @@ namespace ToolBoxTMA
                             string outputPath, 
                             string searchSequence,
                             string destinationFile,
-                            char separator, 
+                            char? separator, 
                             List<string> sheetNames,
                             DataRowCollection mappedCols
                           )
@@ -115,7 +115,7 @@ namespace ToolBoxTMA
             this.outputPath = outputPath;
             this.searchSequence = searchSequence;
             this.destinationFile = destinationFile;
-            this.separator = separator;
+            this.separator = separator.HasValue? separator.Value : default(char);
             this.sheetNames = sheetNames;
             this.mappedCols = mappedCols;
         }
@@ -130,7 +130,7 @@ namespace ToolBoxTMA
                             string inputPath,
                             SearchOption searchOption,
                             string fileType)
-            : this(inputPath, searchOption, fileType, null, null, null, Char.MaxValue, null, null)
+            : this(inputPath, searchOption, fileType, null, null, null, null, null, null)
         {
             
         }
@@ -151,7 +151,7 @@ namespace ToolBoxTMA
                             string outputPath,
                             string searchSequence,
                             string destinationFile)
-            : this(inputPath, searchOption, fileType, outputPath, searchSequence, destinationFile, Char.MaxValue, null, null)
+            : this(inputPath, searchOption, fileType, outputPath, searchSequence, destinationFile, null, null, null)
         {
 
         }
@@ -229,7 +229,7 @@ namespace ToolBoxTMA
         #region Méthodes publiques
 
         /// <summary>
-        /// Recherche les fichiers de même type
+        /// Récupère les fichiers de même type
         /// </summary>
         /// <returns>Renvoi la liste des fichiers du même type contenant au moins une ligne</returns>
         public List<String> RetrieveComonFiles() 
@@ -243,7 +243,7 @@ namespace ToolBoxTMA
         }
 
         /// <summary>
-        /// Renomme les fichiers horodatés
+        /// Renomme les fichiers plats horodatés
         /// </summary>
         /// <param name="ListeFichiers"></param>
         /// <returns>Renvoi la liste des fichiers horodatés</returns>
