@@ -1,0 +1,7 @@
+Rename the CADIS.DPSAPPlugin.dll to CADIS.DPSAPPlugin.old.dll in C:\Program Files\Markit Group\Markit EDM_10_0_8_6\DataPorterPlugIns
+Rename the CADIS.Plugin.Base.dll to CADIS.Plugin.Base.old.dll in C:\Program Files\Markit Group\Markit EDM_10_0_8_6\DataPorterPlugIns
+Rename the CADIS.Plugin.Base.dll to CADIS.Plugin.Base.old.dll in C:\Program Files\Markit Group\Markit EDM_10_0_8_6
+
+Copy the new version of CADIS.DPSAPPlugin.dll to C:\Program Files\Markit Group\Markit EDM_10_0_8_6\DataPorterPlugIns
+Copy the new version of CADIS.Plugin.Base.dll to C:\Program Files\Markit Group\Markit EDM_10_0_8_6\DataPorterPlugIns
+Copy the new version of CADIS.Plugin.Base.dll to C:\Program Files\Markit Group\Markit EDM_10_0_8_6
