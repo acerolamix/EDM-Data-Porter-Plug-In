@@ -258,7 +258,7 @@ namespace ToolBoxTMA
         {
             List<string> fichiersCrees = null;            
 
-            // Enumération des fichiers du même type
+            // Enumération des fichiers horodatés
             ListeFichiers.ForEach(
                                     fic =>
                                             {
@@ -266,28 +266,28 @@ namespace ToolBoxTMA
                                                 string nomFinal = fi.Name.Substring(0, fi.Name.Length - "_HHmmss".Length - FileType.Length);
                                                 string dest = null;
 
-                                                // Test pour savoir si d'autres fichiers auront le même nom
+                                                // Test pour savoir si plusieurs fichiers renommés auront le même nom
                                                 if (ListeFichiers.Count(ffi => ffi.Contains(nomFinal)) > 1)
                                                 {
-                                                    if (!Directory
-                                                                 .Exists(
-                                                                            Path.Combine(
-                                                                                            fi.DirectoryName,
-                                                                                            fi.Name.Substring(0, fi.Name.Length - FileType.Length)
-                                                                                        )
-                                                                         )
+                                                    // Test d'existence du dossier portant le même nom que le fichier horodaté
+                                                    if (
+                                                            !Directory.Exists(
+                                                                                Path.Combine(
+                                                                                                fi.DirectoryName,
+                                                                                                fi.Name.Substring(0, fi.Name.Length - FileType.Length)
+                                                                                            )
+                                                                             )
                                                        )
                                                             {
                                                                 // Création du répertoire de  stockage du fichier privé de son horodatage
                                                                 Directory.CreateDirectory(
-                                                                                            Path.Combine
-                                                                                            (
-                                                                                                fi.DirectoryName,
-                                                                                                fi.Name.Substring(0, fi.Name.Length - FileType.Length)
-                                                                                            )
-                                                                                         );                                                                
+                                                                                            Path.Combine(
+                                                                                                            fi.DirectoryName,
+                                                                                                            fi.Name.Substring(0, fi.Name.Length - FileType.Length)
+                                                                                                        )
+                                                                                          );                                                                
                                                             }
-                                                            // Détermination du du chemin complet du fichier privé de son horodatage
+                                                            // Création du nom de fichier dépourvu de son horodatage
                                                             dest = Path.Combine(
                                                                                     fi.DirectoryName,
                                                                                     fi.Name.Substring(0, fi.Name.Length - FileType.Length),
@@ -295,9 +295,10 @@ namespace ToolBoxTMA
                                                                                 );
                                                 }
                                                 else
+                                                    // Création du nom de fichier dépourvu de son horodatage
                                                     dest = Path.Combine(fi.DirectoryName, nomFinal + FileType);
 
-                                                // Enregistrement du nouveau fichier
+                                                // Copie de fichiers
                                                 File.Copy(fic, dest, true);
 
                                                 // Ajout du fichier renommé à la liste des fichiers renommés
@@ -465,7 +466,8 @@ namespace ToolBoxTMA
                     // Ajoût du séparateur et  de l'en-tête suivante
                     ch.Append(this.separator.ToString() + entete);
             }
-            header = ch.ToString();
+            // SVE - 08/02/2017 - Ajoût de la colonne ORIGINE
+            header = ch.Append(this.separator.ToString() + "ORIGINE").ToString();
         }        
 
         /// <summary>
@@ -534,7 +536,7 @@ namespace ToolBoxTMA
                     // Récupération de la valeur de la cellule
                     xlValue = xlCel == null ? String.Empty : String.Format(CultureInfo.CurrentCulture, xlCel.ToString().Trim());
 
-                    // Si on se situe sur la colonne Building et que la valeur est nulle => on passe à la ligne suivante sans rien enregistrer
+                    // Si on se situe sur la colonne Building et que la valeur est nulle => on ignore la ligne lue (Règle de gestion) en passant  à la suivante
                     if (ws.Cells[namedZone.Name].Text.Trim().StartsWith("Building", StringComparison.Ordinal) && String.IsNullOrEmpty(xlValue))
                     {
                         if (rowData != null)
@@ -563,6 +565,10 @@ namespace ToolBoxTMA
                 }
                 if (rowData != null && rowData.ToString().Length > 0)
                 {
+                    // SVE - 08/02/2017 - Ajoût du nom de l'onglet source dans la colonne ORIGNINE
+                    rowData.Append(this.separator.ToString() + ws.Name);
+
+
                     // Ajout de la ligne à la collection de lignes
                     matchedDatas.Add(rowData.ToString());
                     // Reset du buffer
@@ -603,6 +609,20 @@ namespace ToolBoxTMA
                 }
             }
             return res;
+        }
+
+        private string GetXLCellValue(Dictionary<Tuple<int, int>, Object> cellulesOnglet, int ligne, int colonne)
+        {
+
+            // Récupération de la cellule située en ligne : numLig et en colonne : col RE_X
+            Object objCel = cellulesOnglet.FirstOrDefault(kvp => kvp.Key.Item1 == ligne && kvp.Key.Item2 == colonne).Value;
+            // Récupération de la valeur de la cellule
+            return objCel == null ? String.Empty : String.Format(CultureInfo.CurrentCulture, TestDecimalSeparator(objCel.ToString().Trim()));
+        }
+
+        private string TestDecimalSeparator(string v)
+        {
+            throw new NotImplementedException();
         }
         #endregion
 

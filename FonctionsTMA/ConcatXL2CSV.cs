@@ -111,6 +111,7 @@ namespace FonctionsTMA
             Dictionary<string, string> outputParams = new Dictionary<string, string>();
 
             #region Validate Input params
+
             // Contrôle des paramètres (obligatoires et optionnels) saisis depuis l'interface Markit
             string monRepIn = GetMandatoryParameter(inputParameters, Concatener.PRM_REP_IN);
             string monRepOut = GetMandatoryParameter(inputParameters, Concatener.PRM_REP_OUT);
