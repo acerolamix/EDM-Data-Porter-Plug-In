@@ -37,6 +37,11 @@ namespace FonctionsTMA
         /// Séparateur de colonnes
         /// </summary>
         private const string PRM_FIC_SEP = "Séparateur de colonne à utiliser";
+
+        /// <summary>
+        /// Colonne(s) informative(s) additionnelle(s)
+        /// </summary>
+        private const string PRM_EXTRA_INFOCOL = "Colonne(s) informelle(s) additionnelle(s)";
         #endregion
 
         #region Properties
@@ -59,6 +64,8 @@ namespace FonctionsTMA
                 inputs.Add(PRM_FIC_SEP, "Optional - Séparateur de colonne à utiliser - Caractère ';' si non renseigné");
                 inputs.Add(Concatener.PRM_VERBOSE, "Optional - Caractère permettant d'activer les logs : 'Y' -> Active l'affichage");
 
+                // SVE - 15/02/2017 - Ajoût de colonne(s) informelle(s)
+                inputs.Add(PRM_EXTRA_INFOCOL, "Optional - Colonne(s) informelle(s) - Séparateur ';' - Ex: Date du rapport, Source des données, Créateur du rapport, ...");
                 return inputs;
             }
         }
@@ -114,6 +121,7 @@ namespace FonctionsTMA
 
             // Contrôle des paramètres (obligatoires et optionnels) saisis depuis l'interface Markit
             string monRepIn = GetMandatoryParameter(inputParameters, Concatener.PRM_REP_IN);
+
             string monRepOut = GetMandatoryParameter(inputParameters, Concatener.PRM_REP_OUT);
 
             List<string> listeSH = GetMandatoryParameter(inputParameters, PRM_LST_SH).Split(';').ToList();
@@ -121,6 +129,9 @@ namespace FonctionsTMA
 
             char separator = String.IsNullOrEmpty(inputParameters[PRM_FIC_SEP].Trim()) ? ';' : inputParameters[PRM_FIC_SEP].Trim()[0];
             bool doVerbs = inputParameters[Concatener.PRM_VERBOSE].Trim() == "Y" ? true : false;
+
+            // SVE - 15/02/2017 - Ajoût de colonne(s) informelle(s)
+            string extraInfoCols = inputParameters[PRM_EXTRA_INFOCOL].Trim();
             #endregion
 
             #region Invocation de la fonction  
@@ -139,7 +150,7 @@ namespace FonctionsTMA
                 // Initialisation de la classe de gestion des fichiers
                 if (doVerbs)
                     LogMessage(MessageSeverity.Information, "Initialisation des paramètres de la fonction 'ConcatXL2CSV'");
-                FileHandler gestFic = new FileHandler(monRepIn, SearchOption.TopDirectoryOnly, ".csv", monRepOut, String.Empty, String.Empty, separator, listeSH, dtMapping.Rows);
+                FileHandler gestFic = new FileHandler(monRepIn, SearchOption.TopDirectoryOnly, ".csv", monRepOut, String.Empty, String.Empty, separator, listeSH, dtMapping.Rows, extraInfoCols);
 
                 // Récupération des lignes issues des onglets
                 if (doVerbs)

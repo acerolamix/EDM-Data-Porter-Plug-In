@@ -86,13 +86,28 @@ namespace ToolBoxTMA
         /// <summary>
         /// Table de correspondance entre des colonnes Excel
         /// </summary>
-        private DataRowCollection mappedCols;
+        private DataRowCollection mappedCols;   
+
+        /// <summary>
+        /// Colonne(s) informative(s) additionnelle(s)
+        /// </summary>
+        private string xtraInfoCol;
+
+        /// <summary>
+        /// Le nom de l'onglet Excel
+        /// </summary>
+        private string worksheet;
+
+        /// <summary>
+        /// Le nom du classeur
+        /// </summary>
+        private string workbook;
         #endregion
 
         #region Constructeurs
 
         /// <summary>
-        /// Constructeur avec 9 paramètres du gestionnaire de fichiers
+        /// Constructeur avec 10 paramètres du gestionnaire de fichiers
         /// </summary>
         /// <param name="inputPath">Chemin du répertoire ou du fichier d'entré</param>
         /// <param name="searchOption">Flag d'inclusion des sous dossiers</param>
@@ -112,7 +127,8 @@ namespace ToolBoxTMA
                             string destinationFile,
                             char? separator, 
                             List<string> sheetNames,
-                            DataRowCollection mappedCols
+                            DataRowCollection mappedCols,
+                            string xtraInfoCol = ""
                           )
 
         {
@@ -125,6 +141,9 @@ namespace ToolBoxTMA
             this.separator = separator.HasValue? separator.Value : default(char);
             this.sheetNames = sheetNames;
             this.mappedCols = mappedCols;
+
+            // SVE - 15/02/2017 - Ajoût de colonne(s) informelle(s)
+            this.xtraInfoCol = xtraInfoCol;
         }
 
         /// <summary>
@@ -224,11 +243,46 @@ namespace ToolBoxTMA
             }
         }
 
-        public List<string> Onglets
+        /// <summary>
+        /// Propriété Liste de colonnes informelles du rapport csv
+        /// </summary>
+        public List<string> XtraInfoCols
         {
             get
             {
-                return this.sheetNames;
+                return this.xtraInfoCol.Split(';').ToList();
+            }
+        }
+
+        /// <summary>
+        /// Propriété Nom de l'onglet Excel
+        /// </summary>
+        public string WorkSheet
+        {
+            get
+            {
+                return this.worksheet;
+            }
+
+            set
+            {
+                this.worksheet = value;
+            }
+        }
+
+        /// <summary>
+        /// Propriété Nom du classeur
+        /// </summary>
+        public string WorkBook
+        {
+            get
+            {
+                return this.workbook;
+            }
+
+            set
+            {
+                this.workbook = value;
             }
         }
         #endregion
@@ -337,7 +391,7 @@ namespace ToolBoxTMA
                 List<string> lignesFichier = null;
                 int compteurFic = -1;
 
-                // Enumération des noms de fichiers non formaté Excel
+                // Enumération des noms de fichiers plats (.dat, .csv, .txt, ...)
                 source.ForEach(
                                 fic =>
                                         {
@@ -370,43 +424,46 @@ namespace ToolBoxTMA
             List<string> matchedDatas = null;
             string header;
 
+            WorkBook = new FileInfo(this.inputPath).Name;
+
             // Ouverture en lecture seule du classeur Excel 
             using (ExcelPackage pck = new ExcelPackage(File.Open(this.inputPath, FileMode.Open)))
-            {
+            {                
                 // Contrôle d'existence des onglets
-                if (!this.ChekeckedSheetName(pck.Workbook, this.sheetNames))
+                if (!this.ChekeckedSheetName(pck.Workbook))
                     throw new Exception("Le(s) onglet(s) est/sont absent(s) du classeur");
 
                 // Ajoût des zones nommées
                 this.AddColumnsNames(pck.Workbook, out header);
 
                 // Actions sur chaque onglet
-                Onglets.ForEach(
-                                    nomSh =>
-                                                {
-                                                    ExcelWorksheet sh = pck.Workbook.Worksheets[nomSh];
+                pck.Workbook.Worksheets.ToList().ForEach(
+                                                            sh =>
+                                                                    {
+                                                                        WorkSheet = sh.Name.Trim();
+                                                                        //ExcelWorksheet sh = pck.Workbook.Worksheets[nomSh];
 
-                                                    // Contrôle d'existence des zones nommées
-                                                    if (sh.Names.Where(zn => zn.Name.StartsWith("RE_", StringComparison.Ordinal)) == null || sh.Names.Count(zn => zn.Name.StartsWith("RE_", StringComparison.CurrentCulture)) == 0)
-                                                        throw new Exception("Aucune zones nommées dans l'onglet '" + sh.Name);
+                                                                        // Contrôle d'existence des zones nommées
+                                                                        if (sh.Names.Where(zn => zn.Name.StartsWith("RE_", StringComparison.Ordinal)) == null || sh.Names.Count(zn => zn.Name.StartsWith("RE_", StringComparison.CurrentCulture)) == 0)
+                                                                            throw new Exception("Aucune zones nommées dans l'onglet '" + sh.Name);
 
-                                                    if (matchedDatas == null)
-                                                    {
-                                                        matchedDatas = new List<string>();
-                                                        // Ajoût d'une En-tête aux lignes à récupérer
-                                                        matchedDatas.Add(header);
-                                                    }
-                                                    // Cumul des lignes lues issues des onglets 
-                                                    matchedDatas.AddRange(
-                                                                             this.BuildLines(
-                                                                                                this.RecupererDonneesOnglet(sh),
-                                                                                                GetRangesFrom("Entity", sh).First().Start.Row + 1,
-                                                                                                GetRangesFrom("TOTAL", sh).First().Start.Row,
-                                                                                                sh.Names.Where(zn => zn.Name.StartsWith("RE_", StringComparison.Ordinal)).ToList()
-                                                                                            )
-                                                                         );
-                                                }
-                               );
+                                                                        if (matchedDatas == null)
+                                                                        {
+                                                                            matchedDatas = new List<string>();
+                                                                            // Ajoût d'une En-tête aux lignes à récupérer
+                                                                            matchedDatas.Add(header);
+                                                                        }
+                                                                        // Cumul des lignes lues issues des onglets 
+                                                                        matchedDatas.AddRange(
+                                                                                                    this.BuildLines(
+                                                                                                                    this.RecupererDonneesOnglet(sh),
+                                                                                                                    GetRangesFrom("Entity", sh).First().Start.Row + 1,
+                                                                                                                    GetRangesFrom("TOTAL", sh).First().Start.Row,
+                                                                                                                    sh.Names.Where(zn => zn.Name.StartsWith("RE_", StringComparison.Ordinal)).ToList()
+                                                                                                                )
+                                                                                                );
+                                                                    }
+                                                       );
             }                      
             return matchedDatas;
         }  
@@ -417,8 +474,8 @@ namespace ToolBoxTMA
         /// <summary>
         /// Ajoute des zones nommées de feuille Excel
         /// </summary>
-        /// <param name="workbook">Classeur Excel</param>
-        private void AddColumnsNames(ExcelWorkbook workbook , out string header)
+        /// <param name="wkb">Classeur Excel</param>
+        private void AddColumnsNames(ExcelWorkbook wkb , out string header)
         {
             int cpt = 0;
             StringBuilder ch = null;
@@ -432,14 +489,14 @@ namespace ToolBoxTMA
                 // Ajoût des zones nommées sur l'onglet 'RE INVESTMENT'
                 this.AddName2Sheet(
                                         hd[1].ToString().Trim(),
-                                        workbook.Worksheets[this.sheetNames[0]],
+                                        wkb.Worksheets[this.sheetNames[0]],
                                         "RE_" + cpt.ToString()
                                   );
 
                 // Ajoût des zones nommées sur l'onglet 'RE INVESTMENT ON USE'
                 this.AddName2Sheet(
                                         hd[2].ToString().Trim(),
-                                        workbook.Worksheets[this.sheetNames[1]],
+                                        wkb.Worksheets[this.sheetNames[1]],
                                         "RE_" + cpt.ToString()
                                   );
 
@@ -466,8 +523,14 @@ namespace ToolBoxTMA
                     // Ajoût du séparateur et  de l'en-tête suivante
                     ch.Append(this.separator.ToString() + entete);
             }
-            // SVE - 08/02/2017 - Ajoût de la colonne ORIGINE
-            header = ch.Append(this.separator.ToString() + "ORIGINE").ToString();
+            // SVE - 15/02/2017 - Ajoût de colonne(s) informelle(s) dans le header
+            if (XtraInfoCols != null && xtraInfoCol.Count() > 0)
+            {
+                XtraInfoCols.ForEach(
+                                        col => ch.Append(this.separator.ToString() + col)
+                                    );
+            }
+            header = ch.ToString();
         }        
 
         /// <summary>
@@ -488,13 +551,13 @@ namespace ToolBoxTMA
         /// <summary>
         /// Récupération des cellules d'un onglet Excel  
         /// </summary>
-        /// <param name="worksheet">Onglet Excel lu</param>
+        /// <param name="wks">Onglet Excel lu</param>
         /// <returns>Renvoi un dictionnaire de cellules d'un onglet Excel</returns>
-        private Dictionary<Tuple<int, int>, Object> RecupererDonneesOnglet(ExcelWorksheet worksheet)
+        private Dictionary<Tuple<int, int>, Object> RecupererDonneesOnglet(ExcelWorksheet wks)
         {
             Dictionary<Tuple<int, int>, Object> cellsFromXLSheet = null;
             // Initialisation de la plage de recherche
-            ExcelRange cells = worksheet.Cells;
+            ExcelRange cells = wks.Cells;
 
             // Affectation de toutes les cellules (type Objet) dans un dictionnaire dont la clé est l'adresse de la cellule (Ligne, Colonne)
             cellsFromXLSheet = cells
@@ -505,7 +568,7 @@ namespace ToolBoxTMA
                                       );
             // Si aucune données récupérées alors une erreur est lancée
             if (cellsFromXLSheet == null || cellsFromXLSheet.Count == 0)
-                throw new Exception("Aucune valeur n'a pu être récupérée de l'onglet " + worksheet.Name);
+                throw new Exception("Aucune valeur n'a pu être récupérée de l'onglet " + wks.Name);
 
             return cellsFromXLSheet;
         }
@@ -528,6 +591,9 @@ namespace ToolBoxTMA
             for (int numLig = topLine; numLig < endLine; numLig++)
             {
                 string xlValue;
+
+                #region Parcours des colonnes de la ligne
+
                 // Parcours des colonnes Excel taguées par la zone nommée RE_X
                 foreach (ExcelNamedRange namedZone in nzHeaders)
                 {
@@ -563,66 +629,86 @@ namespace ToolBoxTMA
                         // Ajoût du séparateur et de la valeur de la colonne au buffer
                         rowData.Append(this.separator.ToString() + xlValue);
                 }
+                #endregion
+
                 if (rowData != null && rowData.ToString().Length > 0)
                 {
-                    // SVE - 08/02/2017 - Ajoût du nom de l'onglet source dans la colonne ORIGNINE
-                    rowData.Append(this.separator.ToString() + ws.Name);
+                    #region Gestion de l'ajout des colonnes non liées au business
 
+                    // SVE - 15/02/2017 - Ajoût des données de colonne(s) informelle(s)
+                    if (XtraInfoCols.FirstOrDefault() != null)
+                        rowData.Append(this.AddInfoColDatas());
+                    #endregion
 
                     // Ajout de la ligne à la collection de lignes
                     matchedDatas.Add(rowData.ToString());
-                    // Reset du buffer
+                    // Flush du buffer
                     rowData = null;
                 }
             }
             return matchedDatas;
         }
-        
+
         /// <summary>
-        /// Teste l'existence d'un onglet Excel
+        /// Ajoute les données d'une colonne non liées au Business
         /// </summary>
-        /// <param name="wkb">Classeur</param>
-        /// <param name="sheetName">Nom de l'onglet</param>
-        /// <returns>Renvoi true si 'longlet existe sinon false</returns>
-        private bool SheetExists(ExcelWorkbook wkb, string sheetName)
+        private string AddInfoColDatas()
         {
-            return wkb.Worksheets.Contains(wkb.Worksheets[sheetName]);
+            string additionalData = String.Empty;
+            XtraInfoCols.ForEach(
+                                    col =>
+                                            {                                                       
+
+                                                // Ajouter des cases en fonction de ce qu'on veut ajouter - Attention, cela ne concerne pas les données du métier...
+                                                switch (col)
+                                                {
+                                                    case "WORKSHEET_NAME":
+                                                        additionalData += this.separator + WorkSheet;
+                                                        break;
+
+                                                    // Copier, coller, décommenter et compléter le code suivant - 1 case par colonne supplémentaire....
+
+                                                    //case "Nouvelle Colonne" :
+                                                    //additionalData += this.separator + "Donnée de la colonne à ajouter à la ligne";
+                                                    //break;
+
+                                                    case "Date_Jour":
+                                                        additionalData += this.separator + DateTime.Now.ToString("MM/dd/yyyy");
+                                                        break;
+
+                                                    default:
+                                                        additionalData += this.separator + "Sourcer la donnée dans le plugin !!!";
+                                                        break;
+                                                }                                                        
+                                            }
+                                );
+
+            return additionalData;
         }
 
         /// <summary>
         /// Teste l'existence d'une liste d'onglets
         /// </summary>
-        /// <param name="excelWorkbook">Classeur</param>
-        /// <param name="sheets">Liste des onglets recherchés</param>
+        /// <param name="wkb">Classeur</param>
         /// <returns>Renvoi true si toute la liste est présente sinon false</returns>
-        private bool ChekeckedSheetName(ExcelWorkbook excelWorkbook, List<string> sheets)
+        private bool ChekeckedSheetName(ExcelWorkbook wkb)
         {
-            bool res = true;
-            // Parcours de la liste des onglets envoyés par Markit
-            foreach (string sheetName in sheets)
-            {
-                // Renvoi Vrai si l'onglet existe sion Faux
-                if (!this.SheetExists(excelWorkbook, sheetName))
-                {
-                    res = false;
-                    break;
-                }
-            }
-            return res;
-        }
+            bool resultat = true;
 
-        private string GetXLCellValue(Dictionary<Tuple<int, int>, Object> cellulesOnglet, int ligne, int colonne)
-        {
+            // Parcours de la liste des onglets à trouver dans le classeur Excel 
+            this.sheetNames.ForEach(
+                                        nomFeuille =>
+                                                        {
+                                                            // Test la présence de l'onglet dans le classeur
+                                                            bool isInWorkBook = wkb.Worksheets
+                                                                                            .Select(wks => wks.Name)
+                                                                                            .Contains(nomFeuille);
 
-            // Récupération de la cellule située en ligne : numLig et en colonne : col RE_X
-            Object objCel = cellulesOnglet.FirstOrDefault(kvp => kvp.Key.Item1 == ligne && kvp.Key.Item2 == colonne).Value;
-            // Récupération de la valeur de la cellule
-            return objCel == null ? String.Empty : String.Format(CultureInfo.CurrentCulture, TestDecimalSeparator(objCel.ToString().Trim()));
-        }
-
-        private string TestDecimalSeparator(string v)
-        {
-            throw new NotImplementedException();
+                                                            if (resultat && (!isInWorkBook))
+                                                                resultat = false;            
+                                                        }                                           
+                                    );
+            return resultat;
         }
         #endregion
 
